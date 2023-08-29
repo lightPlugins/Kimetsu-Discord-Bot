@@ -39,6 +39,8 @@ public class BanCommand extends ListenerAdapter {
         String loginName = subCommand0.getAsString();
         String banReason = subCommand1.getAsString();
 
+        /* PRE - Check if ban reason is not too long, caused by the database limit of 250 chars (VARCHAR 250) */
+
         if(banReason.length() > 240) {
             event.reply(":no_entry: The ban reason is to long - max 240 characters").setEphemeral(true).queue();
             return;
@@ -47,6 +49,8 @@ public class BanCommand extends ListenerAdapter {
         AccountSQL accountSQL = new AccountSQL();
         CompletableFuture<Boolean> completableFuture = accountSQL.userExist(loginName);
 
+        /* STEP 1 - If user exist */
+
         try {
             if(!completableFuture.get()) {
                 event.reply(":no_entry: " +
@@ -54,20 +58,44 @@ public class BanCommand extends ListenerAdapter {
                 return;
             }
 
-            CompletableFuture<String> futureGetHwID = accountSQL.getHwID(loginName);
+            /* STEP 2 - Hwid may not be found */
+
+            CompletableFuture<String> futureGetHwID = accountSQL.getUserHwid(loginName);
             if(futureGetHwID.get() == null) {
                 event.reply(":no_entry: " +
-                        "No HwID found for this user").setEphemeral(true).queue();
+                        "No hwid found for this user. That should not happen").setEphemeral(true).queue();
                 return;
             }
 
             String hwid = futureGetHwID.get();
 
+            /* STEP 3 - Check, if user already banned */
+
+            CompletableFuture<Boolean> futureAlreadyBanned = accountSQL.hwidAlreadyExist(hwid);
+
+            if(futureAlreadyBanned.get()) {
+                event.reply(":no_entry: " +
+                        "Users hwid is already banned").setEphemeral(true).queue();
+                return;
+            }
+
+            /* STEP 4 - Insert the hwid in the new table */
+
+            CompletableFuture<Boolean> futureBanHwid = accountSQL.createHwidBan(hwid);
+
+            if(!futureBanHwid.get()) {
+                event.reply(":no_entry: " +
+                        "Something went wrong while inserting hwid in database.").setEphemeral(true).queue();
+                return;
+            }
+
+
+
 
 
 
         } catch (ExecutionException | InterruptedException e) {
-
+            e.printStackTrace();
         }
 
 
