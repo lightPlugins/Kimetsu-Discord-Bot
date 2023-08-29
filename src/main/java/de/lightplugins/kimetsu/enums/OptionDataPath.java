@@ -14,6 +14,9 @@ public enum OptionDataPath {
 
     COINS_SET_LOGIN_NAME("login-name"),
     COINS_SET_AMOUNT("amount"),
+
+    BAN_LOGIN_NAME("login-name"),
+    BAN_REASON("ban-reason")
     ;
 
     private final String path;

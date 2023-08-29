@@ -145,4 +145,51 @@ public class AccountSQL {
         });
     }
 
+    public CompletableFuture<String> getHwID(String loginName) {
+
+        return CompletableFuture.supplyAsync(() -> {
+
+            Connection connection = null;
+            PreparedStatement ps = null;
+
+            try {
+
+                connection = Main.sqlAccount.getConnection();
+
+                ps = connection.prepareStatement("SELECT * FROM " + accountTable + " WHERE login=?");
+                ps.setString(1, loginName);
+
+
+                ResultSet rs = ps.executeQuery();
+
+                if(rs.next()) {
+                    return rs.getString("hwid");
+                }
+
+                return null;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+
+            } finally {
+                if(connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(ps != null) {
+                    try {
+                        ps.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
 }

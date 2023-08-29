@@ -18,6 +18,9 @@ public class RegisterCommands extends ListenerAdapter {
     public void onGuildReady(@NotNull GuildReadyEvent event) {
 
         List<CommandData> commandData = new ArrayList<>();
+
+        /* Coins command */
+
         OptionData optionData1 = new OptionData(OptionType.STRING, OptionDataPath.COINS_ADD.getName(),
                 "Add coins to a specify user", true);
         OptionData optionData2 = new OptionData(OptionType.STRING, OptionDataPath.COINS_SET_LOGIN_NAME.getName(),
@@ -26,6 +29,17 @@ public class RegisterCommands extends ListenerAdapter {
                 "The amount of coins the user get", true);
         commandData.add(Commands.slash("coins",
                 "Update the coins from a specify user").addOptions(optionData1, optionData2, optionData3));
+
+        /* ban command */
+
+        OptionData optionData4 = new OptionData(OptionType.STRING, OptionDataPath.BAN_LOGIN_NAME.getName(),
+                "The account name from the user", true);
+        OptionData optionData5 = new OptionData(OptionType.STRING, OptionDataPath.BAN_REASON.getName(),
+                "The account name from the user", true);
+        commandData.add(Commands.slash("ban",
+                "ban an HWID from a specify user").addOptions(optionData4, optionData5));
+
+        /* ban command */
 
         event.getGuild().updateCommands().addCommands(commandData).queue(
                 callback -> System.out.println("[KIMETSU] Successfully registered commands"));
