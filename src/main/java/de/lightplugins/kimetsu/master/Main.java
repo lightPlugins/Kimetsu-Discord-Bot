@@ -1,6 +1,7 @@
 package de.lightplugins.kimetsu.master;
 
 import com.zaxxer.hikari.HikariDataSource;
+import de.lightplugins.kimetsu.commands.CoinsCommand;
 import de.lightplugins.kimetsu.database.Connection;
 import de.lightplugins.kimetsu.listener.Events;
 import de.lightplugins.kimetsu.listener.RegisterCommands;
@@ -68,7 +69,11 @@ public class Main {
         /*  Register Events  */
 
         System.out.println("[KIMETSU] Register events ...");
-        shardManager.addEventListener(new Events(), new Startup(), new RegisterCommands());
+        shardManager.addEventListener(
+                new Events(),
+                new Startup(),
+                new RegisterCommands(),
+                new CoinsCommand());
 
     }
 

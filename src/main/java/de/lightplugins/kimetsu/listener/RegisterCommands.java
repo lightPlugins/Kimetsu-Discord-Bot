@@ -17,8 +17,6 @@ public class RegisterCommands extends ListenerAdapter {
 
     public void onGuildReady(@NotNull GuildReadyEvent event) {
 
-
-
         List<CommandData> commandData = new ArrayList<>();
         OptionData optionData1 = new OptionData(OptionType.STRING, OptionDataPath.COINS_SET_LOGIN_NAME.getName(),
                 "The account name from the user", true);
