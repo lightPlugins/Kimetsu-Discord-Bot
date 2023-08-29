@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -297,6 +299,54 @@ public class AccountSQL {
             } catch (SQLException e) {
                 e.printStackTrace();
                 return false;
+
+            } finally {
+                if(connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(ps != null) {
+                    try {
+                        ps.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    public CompletableFuture<List<String>> multipleAccountsWithSameHwid(String hwid) {
+
+        return CompletableFuture.supplyAsync(() -> {
+
+            Connection connection = null;
+            PreparedStatement ps = null;
+
+            try {
+
+                connection = Main.sqlAccount.getConnection();
+
+                ps = connection.prepareStatement("SELECT * FROM "+ accountTable + " WHERE hwid=?");
+                ps.setString(1, hwid);
+
+                List<String> playerList = new ArrayList<>();
+
+                ResultSet rs = ps.executeQuery();
+
+                while(rs.next()) {
+                    playerList.add(rs.getString("login"));
+                }
+
+                return playerList;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
 
             } finally {
                 if(connection != null) {

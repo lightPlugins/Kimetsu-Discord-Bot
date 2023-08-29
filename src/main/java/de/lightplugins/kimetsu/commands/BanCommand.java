@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -89,11 +90,20 @@ public class BanCommand extends ListenerAdapter {
                 return;
             }
 
+            /* STEP 5 - Update user status from OK to BLOCK */
 
+            CompletableFuture<List<String>> futureMultipleHwid = accountSQL.multipleAccountsWithSameHwid(hwid);
 
+            for(String singleLogin : futureMultipleHwid.get()) {
 
-
-
+                CompletableFuture<Boolean> futureUpdateStatus = accountSQL.updateStatus("BLOCK", singleLogin);
+                if(!futureUpdateStatus.get()) {
+                    event.reply(":no_entry: " +
+                            "Something went wrong while updating status from " + singleLogin + " to BLOCK")
+                            .setEphemeral(true).queue();
+                    return;
+                }
+            }
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
