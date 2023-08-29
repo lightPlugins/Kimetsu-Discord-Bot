@@ -3,6 +3,7 @@ package de.lightplugins.kimetsu.master;
 import com.zaxxer.hikari.HikariDataSource;
 import de.lightplugins.kimetsu.database.Connection;
 import de.lightplugins.kimetsu.listener.Events;
+import de.lightplugins.kimetsu.listener.RegisterCommands;
 import de.lightplugins.kimetsu.listener.Startup;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -67,7 +68,7 @@ public class Main {
         /*  Register Events  */
 
         System.out.println("[KIMETSU] Register events ...");
-        shardManager.addEventListener(new Events(), new Startup());
+        shardManager.addEventListener(new Events(), new Startup(), new RegisterCommands());
 
     }
 
