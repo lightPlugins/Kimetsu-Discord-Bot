@@ -6,7 +6,7 @@ public enum OptionDataPath {
         subcommands
      */
 
-    COINS_ADD("add"),
+    COINS_ADD("direction"),
 
     /*
         Command option data names
