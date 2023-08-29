@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -104,6 +106,17 @@ public class BanCommand extends ListenerAdapter {
                     return;
                 }
             }
+
+            Date currentDate = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            String formattedDate = dateFormat.format(currentDate);
+
+
+            event.reply(":white_check_mark: " +
+                            "Successfully banned user " + loginName + " from " + event.getUser().getAsMention() + " at " + formattedDate)
+                    .setEphemeral(true).queue();
+
+
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
