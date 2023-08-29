@@ -17,17 +17,18 @@ public class CoinsCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
+        System.out.println("test1");
         Dotenv config = Dotenv.configure().load();
         long channelID = Long.parseLong(config.get("COMMAND_CHANNEL_ID"));
 
         String triggerCommand = event.getName();
-        if(!triggerCommand.equalsIgnoreCase("coins set"))  {
+        if(!triggerCommand.equalsIgnoreCase("coins"))  {
             return;
         }
 
         try {
             OptionMapping subCommand1 = event.getOption(OptionDataPath.COINS_SET_LOGIN_NAME.getName());
-
+            System.out.println("test2");
             if(subCommand1 == null) {
                 Objects.requireNonNull(event.getJDA().getTextChannelById(channelID))
                         .sendMessage("Missing requirements - login name")
@@ -43,6 +44,7 @@ public class CoinsCommand extends ListenerAdapter {
                         .queue();
                 return;
             }
+            System.out.println("test3");
 
             String loginName = subCommand1.getAsString();
             int coinAmount = subCommand2.getAsInt();
@@ -52,14 +54,17 @@ public class CoinsCommand extends ListenerAdapter {
 
             try {
 
-                if(completableFuture.get()) {
+                if(!completableFuture.get()) {
                     Objects.requireNonNull(event.getJDA().getTextChannelById(channelID))
                             .sendMessage("The user name was not found in the database")
                             .queue();
                     return;
                 }
 
-                CompletableFuture<Boolean> completableFuture1 = accountSQL.updateCoins(coinAmount, loginName);
+                CompletableFuture<Integer> completableFuture2 = accountSQL.getCoins(loginName);
+                int currentCoins = completableFuture2.get();
+
+                CompletableFuture<Boolean> completableFuture1 = accountSQL.updateCoins(currentCoins + coinAmount, loginName);
 
                 if(completableFuture1.get()) {
                     Objects.requireNonNull(event.getJDA().getTextChannelById(channelID))

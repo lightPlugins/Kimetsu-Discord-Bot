@@ -1,6 +1,5 @@
 package de.lightplugins.kimetsu.database;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import de.lightplugins.kimetsu.master.Main;
 
 import java.sql.Connection;
