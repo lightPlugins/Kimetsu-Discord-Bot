@@ -368,4 +368,44 @@ public class AccountSQL {
         });
     }
 
+    public CompletableFuture<Boolean> removeHwidBan(String hwid) {
+
+        return CompletableFuture.supplyAsync(() -> {
+
+            Connection connection = null;
+            PreparedStatement ps = null;
+
+            try {
+
+                connection = Main.sqlAccount.getConnection();
+
+                ps = connection.prepareStatement("DELETE FROM " + hwidTable + " WHERE hwid=?");
+                ps.setString(1, hwid);
+                ps.execute();
+                return true;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+
+            } finally {
+                if(connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(ps != null) {
+                    try {
+                        ps.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
 }

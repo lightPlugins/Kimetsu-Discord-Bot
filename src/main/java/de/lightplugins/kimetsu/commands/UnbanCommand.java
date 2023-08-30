@@ -14,19 +14,19 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class BanCommand extends ListenerAdapter {
+public class UnbanCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-
 
         Dotenv config = Dotenv.configure().load();
         long channelID = Long.parseLong(config.get("COMMAND_CHANNEL_ID"));
 
         String triggerCommand = event.getName();
-        if(!triggerCommand.equalsIgnoreCase("ban"))  {
+        if(!triggerCommand.equalsIgnoreCase("unban"))  {
             return;
         }
+
 
         OptionMapping subCommand0 = event.getOption(OptionDataPath.BAN_LOGIN_NAME.getName());
         if(subCommand0 == null) {
@@ -34,35 +34,18 @@ public class BanCommand extends ListenerAdapter {
             return;
         }
 
-        OptionMapping subCommand1 = event.getOption(OptionDataPath.BAN_REASON.getName());
-        if(subCommand1 == null) {
-            event.reply(":no_entry:  Missing requirements - ban reason").setEphemeral(true).queue();
-            return;
-        }
-
         String loginName = subCommand0.getAsString();
-        String banReason = subCommand1.getAsString();
-
-        /* PRE - Check if ban reason is not too long, caused by the database limit of 250 chars (VARCHAR 250) */
-
-        if(banReason.length() > 240) {
-            event.reply(":no_entry: The ban reason is to long - max 240 characters").setEphemeral(true).queue();
-            return;
-        }
 
         AccountSQL accountSQL = new AccountSQL();
         CompletableFuture<Boolean> completableFuture = accountSQL.userExist(loginName);
 
-        /* STEP 1 - If user exist */
-
         try {
+
             if(!completableFuture.get()) {
                 event.reply(":no_entry: " +
                         "The user name was not found in the database").setEphemeral(true).queue();
                 return;
             }
-
-            /* STEP 2 - Hwid may not be found */
 
             CompletableFuture<String> futureGetHwID = accountSQL.getUserHwid(loginName);
             if(futureGetHwID.get() == null) {
@@ -73,36 +56,31 @@ public class BanCommand extends ListenerAdapter {
 
             String hwid = futureGetHwID.get();
 
-            /* STEP 3 - Check, if user already banned */
-
             CompletableFuture<Boolean> futureAlreadyBanned = accountSQL.hwidAlreadyExist(hwid);
 
-            if(futureAlreadyBanned.get()) {
+            if(!futureAlreadyBanned.get()) {
                 event.reply(":no_entry: " +
-                        "Users hwid is already banned").setEphemeral(true).queue();
+                        "Users hwid is not banned").setEphemeral(true).queue();
                 return;
             }
 
-            /* STEP 4 - Insert the hwid in the new table */
+            CompletableFuture<Boolean> futureUnban = accountSQL.removeHwidBan(hwid);
 
-            CompletableFuture<Boolean> futureBanHwid = accountSQL.createHwidBan(hwid);
-
-            if(!futureBanHwid.get()) {
+            if(!futureUnban.get()) {
                 event.reply(":no_entry: " +
-                        "Something went wrong while inserting hwid in database.").setEphemeral(true).queue();
+                        "Something went wrong while deleting database entry").setEphemeral(true).queue();
                 return;
             }
 
-            /* STEP 5 - Update user status from OK to BLOCK */
 
             CompletableFuture<List<String>> futureMultipleHwid = accountSQL.multipleAccountsWithSameHwid(hwid);
 
             for(String singleLogin : futureMultipleHwid.get()) {
 
-                CompletableFuture<Boolean> futureUpdateStatus = accountSQL.updateStatus("BLOCK", singleLogin);
+                CompletableFuture<Boolean> futureUpdateStatus = accountSQL.updateStatus("OK", singleLogin);
                 if(!futureUpdateStatus.get()) {
                     event.reply(":no_entry: " +
-                            "Something went wrong while updating status from " + singleLogin + " to BLOCK")
+                                    "Something went wrong while updating status from " + singleLogin + " to BLOCK")
                             .setEphemeral(true).queue();
                     return;
                 }
@@ -112,21 +90,18 @@ public class BanCommand extends ListenerAdapter {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
             String formattedDate = dateFormat.format(currentDate);
 
-
             event.reply(":white_check_mark: " +
-                            "Successfully banned user " + loginName)
+                            "Successfully unbanned user " + loginName)
                     .setEphemeral(true).queue();
 
             Objects.requireNonNull(event.getJDA().getTextChannelById(channelID))
                     .sendMessage(":white_check_mark: " +
-                            "Successfully banned user " + loginName + " from " + event.getUser().getAsMention() + " at " + formattedDate)
+                            "Successfully unbanned user " + loginName + " from " + event.getUser().getAsMention() + " at " + formattedDate)
                     .queue();
 
 
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-
-
     }
 }

@@ -39,7 +39,14 @@ public class RegisterCommands extends ListenerAdapter {
         commandData.add(Commands.slash("ban",
                 "ban an HWID from a specify user").addOptions(optionData4, optionData5));
 
-        /* ban command */
+        /* unban command */
+
+        OptionData optionData6 = new OptionData(OptionType.STRING, OptionDataPath.BAN_LOGIN_NAME.getName(),
+                "The account name from the user", true);
+        commandData.add(Commands.slash("unban",
+                "Unban an HWID from a specify user").addOptions(optionData6));
+
+
 
         event.getGuild().updateCommands().addCommands(commandData).queue(
                 callback -> System.out.println("[KIMETSU] Successfully registered commands"));
