@@ -46,6 +46,13 @@ public class RegisterCommands extends ListenerAdapter {
         commandData.add(Commands.slash("unban",
                 "Unban an HWID from a specify user").addOptions(optionData6));
 
+        /* debug command */
+
+        OptionData optionData7 = new OptionData(OptionType.STRING, OptionDataPath.BAN_LOGIN_NAME.getName(),
+                "The account name from the user", true);
+        commandData.add(Commands.slash("debug",
+                "Debug a player").addOptions(optionData7));
+
 
 
         event.getGuild().updateCommands().addCommands(commandData).queue(
