@@ -3,6 +3,7 @@ package de.lightplugins.kimetsu.master;
 import com.zaxxer.hikari.HikariDataSource;
 import de.lightplugins.kimetsu.commands.BanCommand;
 import de.lightplugins.kimetsu.commands.CoinsCommand;
+import de.lightplugins.kimetsu.commands.DebugCommand;
 import de.lightplugins.kimetsu.database.Connection;
 import de.lightplugins.kimetsu.listener.Events;
 import de.lightplugins.kimetsu.listener.RegisterCommands;
@@ -75,7 +76,8 @@ public class Main {
                 new Startup(),
                 new RegisterCommands(),
                 new CoinsCommand(),
-                new BanCommand()
+                new BanCommand(),
+                new DebugCommand()
         );
 
     }
